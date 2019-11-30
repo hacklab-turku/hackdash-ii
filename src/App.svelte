@@ -3,6 +3,7 @@
 
 	import { onMount, setContext } from 'svelte';
 	import { matrixcs, key } from './matrix.js';
+	import creds from './temp-creds.js';
 
 	setContext(key, {
 		getClient: () => matrixClient
@@ -34,9 +35,7 @@
 		matrixClient = matrixcs.createClient(
 		{
             ...storeOpts,
-			baseUrl: "base_url",
-			accessToken: "access_token",
-			userId: "user_id",
+			...creds,
 			unstableClientRelationAggregation: true,
             useAuthorizationHeader: true,
             timelineSupport: true,
