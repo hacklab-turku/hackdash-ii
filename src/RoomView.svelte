@@ -65,11 +65,15 @@
 	});
 
 	afterUpdate(() => {
+        reflow();
+    });
+    
+    function reflow() {
         if (eventlist) {
             if (scrolledToBottom) { eventlist.scrollTo(0, eventlist.scrollHeight); }
             else { eventlist.scrollTo(0, eventlist.scrollHeight-oldDistanceFromBottom); };
         }
-	});
+    }
 </script>
 
 <style>
@@ -147,9 +151,9 @@
             <div class="spacer"></div>
             {#each room.getLiveTimeline().getEvents() as event, i (event.getId())}
                 {#if eventDisplayType(event) == "DISPLAY"}
-                    <div class="event"><EventItem {room} {event} showSender={shouldShowSender(i)}></EventItem></div>
+                    <div class="event"><EventItem on:reflow={reflow} {room} {event} showSender={shouldShowSender(i)}></EventItem></div>
                 {:else if eventDisplayType(event) == "SMALL"}
-                    <div class="event"><SmallEventItem {event}}></SmallEventItem></div>
+                    <div class="event"><SmallEventItem on:reflow={reflow} {event}}></SmallEventItem></div>
                 {/if}
             {/each}
         </div>

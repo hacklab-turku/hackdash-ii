@@ -49,6 +49,11 @@ export function getSimpleText(event) {
     else { return 'Unimplemented event'; /*TODO*/ }
 }
 
+export function getImageHeight(event, clientWidth) {
+    let i = event.getContent().info;
+    let aspectRatio = i.h/i.w;
+    return clientWidth*aspectRatio;
+}
 /*
 Copyright 2017 New Vector Ltd
 Copyright 2019 Michael Telatynski <7t3chguy@gmail.com>

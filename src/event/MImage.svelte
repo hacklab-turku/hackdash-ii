@@ -1,21 +1,18 @@
 <script>
-	import { getContext, beforeUpdate } from 'svelte';
+	import { createEventDispatcher, getContext, beforeUpdate } from 'svelte';
     import { key } from '../matrix.js';
+    import { getImageHeight } from '../event-utils.js';
     
+    const dispatch = createEventDispatcher();
+
 	const { getClient } = getContext(key);
     const client = getClient();
 
     export let event;
-
-    function getHeight(event, clientWidth) {
-        let i = event.getContent().info;
-        let aspectRatio = i.h/i.w;
-        return width*aspectRatio;
-    }
-
     export let width;
+    
     let height;
-    $: height = getHeight(event, width);
+    $: height = getImageHeight(event, width);
 </script>
 
 <style>
@@ -25,4 +22,4 @@
     }
 </style>
 
-<img alt={event.getContent().body} src={client.mxcUrlToHttp(event.getContent().url)} width={width} height={height} />
+<img on:load={() => dispatch('reflow')} alt={event.getContent().body} src={client.mxcUrlToHttp(event.getContent().url)} width={width} height={height} />

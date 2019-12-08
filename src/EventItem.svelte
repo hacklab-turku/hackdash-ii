@@ -8,6 +8,7 @@
     import { key } from './matrix.js';
     import { getParentEventId, getViewType } from './event-utils.js';
     
+
 	const { getClient } = getContext(key);
     const client = getClient();
 
@@ -181,7 +182,7 @@
         {#if messageText.isDisplayedWithHtml}{@html messageText.text}{:else}{messageText.text}{/if}
         {#if edited}<span class="edited">(edited)</span>{/if}
     {:else if messageViewType === "image"}
-        <div class="image"><MImage width={width/2} {event}></MImage></div>
+        <div class="image"><MImage on:reflow width={width/2} {event}></MImage></div>
     {/if}
 </div>
 <span class="timestamp">{timestamp}</span>
