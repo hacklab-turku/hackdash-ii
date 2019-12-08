@@ -30,6 +30,12 @@
         else { return "Unsupported message"; }
     }
 
+    function getTimestamp(event) {
+        return new Date(event.getTs()).toLocaleTimeString([], {hour12: false, hour: '2-digit', minute: '2-digit'});
+    }
+
+    let width;
+
     let edited;
     let messageText;
     let messageViewType;
@@ -37,12 +43,15 @@
     let replyEventId;
     let replyTo;
 
+    let timestamp;
+
     beforeUpdate(() => {
             edited = !!event.replacingEvent();
             messageText = getMessageText();
             messageViewType = getViewType(event);
             replyEventId = getParentEventId(event);
             replyTo = room.findEventById(replyEventId);
+            timestamp = getTimestamp(event);
     });
 </script>
 <style>
@@ -63,6 +72,13 @@
 .message :global(pre) {
     overflow-x: scroll;
 }
+.message :global(p) {
+    margin-top: 0.5em;
+    margin-bottom: 0;
+}
+.message :global(p):first-of-type {
+    margin-top: 0em;
+}
 .reply {
     border-left: 2px solid grey;
     padding-left: 0.5em;
@@ -74,6 +90,14 @@
 .image {
     max-width: 50%;
 }
+.timestamp {
+    font-size: 0.6rem;
+    position: absolute;
+    bottom: 0;
+    text-align: center;
+    margin-bottom: 0.6rem;
+}
+
 
 @media (min-width: 870px) {
     .avatar {
@@ -96,6 +120,9 @@
         margin-bottom: 0.5em;
         margin-right: 1em;
     }
+    .timestamp {
+        width: 4rem;
+    }
 }
 
 @media (max-width: 869px) {
@@ -117,6 +144,9 @@
         margin-left: 3em;
         margin-bottom: 0.5em;
         margin-right: 0.5em;
+    }
+    .timestamp {
+        width: 3rem;
     }
 }
 </style>
@@ -146,11 +176,12 @@
         {/if}
     </div>
 {/if}
-<div class="message">
+<div bind:clientWidth={width} class="message">
     {#if messageViewType === "text"}
         {#if messageText.isDisplayedWithHtml}{@html messageText.text}{:else}{messageText.text}{/if}
         {#if edited}<span class="edited">(edited)</span>{/if}
     {:else if messageViewType === "image"}
-        <div class="image"><MImage {event}></MImage></div>
+        <div class="image"><MImage width={width/2} {event}></MImage></div>
     {/if}
 </div>
+<span class="timestamp">{timestamp}</span>

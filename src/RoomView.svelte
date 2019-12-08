@@ -15,7 +15,8 @@
     let room;
 
     let scrolledToBottom = true;
-    let oldDistanceFromBottom;
+    let oldDistanceFromBottom = 0;
+    let initialLoad = true;
     let eventlist;
 
     const dispatch = createEventDispatcher();
@@ -53,17 +54,21 @@
 
     beforeUpdate(() => {
         room = room;
-        if (eventlist) {
-            scrolledToBottom = eventlist.clientHeight + eventlist.scrollTop > eventlist.scrollHeight - 20;
-            oldDistanceFromBottom = eventlist.scrollHeight-eventlist.scrollTop;
+        if (!initialLoad) {
+            if (eventlist) {
+                scrolledToBottom = eventlist.clientHeight + eventlist.scrollTop > eventlist.scrollHeight - 20;
+                oldDistanceFromBottom = eventlist.scrollHeight-eventlist.scrollTop;
+            }
+        } else {
+            initialLoad = false;
         }
 	});
 
 	afterUpdate(() => {
-        try {
-                if (scrolledToBottom) { eventlist.scrollTo(0, eventlist.scrollHeight); }
-                else { eventlist.scrollTo(0, eventlist.scrollHeight-oldDistanceFromBottom); };
-        } catch (e) {}
+        if (eventlist) {
+            if (scrolledToBottom) { eventlist.scrollTo(0, eventlist.scrollHeight); }
+            else { eventlist.scrollTo(0, eventlist.scrollHeight-oldDistanceFromBottom); };
+        }
 	});
 </script>
 
@@ -114,6 +119,9 @@
     min-height: 3em;
     border-top: 1px solid rgb(200, 200, 200);
 }
+.event {
+    position: relative;
+}
 
 @media (min-width: 870px) {
     .backbutton {
@@ -132,7 +140,7 @@
     {#if room}
         <div class="topbar">
             <a on:click={()=>dispatch('close')} class="backbutton"><i class="fa fa-angle-left" aria-hidden="true"></i></a>
-            <div class="roomavatar"><MatrixAvatar size="1" mxcUrl={room.getAvatarUrl(client.baseUrl)} name={room.name}></MatrixAvatar></div>
+            <div class="roomavatar"><MatrixAvatar size="1" imageUrl={room.getAvatarUrl(client.baseUrl)} name={room.name}></MatrixAvatar></div>
             <span class="roomname">{room.name}</span>
         </div>
         <div bind:this={eventlist} class="eventlist">

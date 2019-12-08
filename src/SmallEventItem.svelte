@@ -87,38 +87,48 @@
                 return "Unsupported event "+event.getType();
         }
     }
+
+    function getTimestamp(event) {
+        return new Date(event.getTs()).toLocaleTimeString([], {hour12: false, hour: '2-digit', minute: '2-digit'});
+    }
+    let timestamp = getTimestamp(event);
 </script>
 <style>
 .container {
     display: flex;
     flex-direction: row;
-    padding-left: 4em;
+    align-items: baseline;
     margin-top: 0.2em;
 }
 .avatar {
     width: 1em;
     height: 1em;
     margin-right: 0.5em;
+    flex-shrink: 0;
 }
 .message {
     margin-bottom: 0.5em;
     margin-right: 1em;
     font-size: 0.9em;
 }
-
+.timestamp {
+    font-size: 0.6rem;
+    text-align: center;
+}
 @media (min-width: 870px) {
-    .container {
-        padding-left: 4em;
+    .timestamp {
+        width: 4rem;
     }
 }
 @media (max-width: 869px) {
-    .container {
-        padding-left: 3em;
+    .timestamp {
+        width: 3rem;
     }
 }
 </style>
 
 <div class="container">
+    <div class="timestamp">{timestamp}</div>
     {#if event.sender}
         <div class="avatar">
             <MatrixAvatar size="0.5" mxcUrl={event.sender.getAvatarUrl(client.baseUrl)} name={event.sender.name}></MatrixAvatar>

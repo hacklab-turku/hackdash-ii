@@ -1,7 +1,11 @@
 <script>
     import { getParentEventId, getViewType } from '../event-utils.js';
     import MImage from './MImage.svelte';
-    import { beforeUpdate } from 'svelte';
+    import { beforeUpdate, getContext } from 'svelte';
+    import { key } from '../matrix.js';
+    
+	const { getClient } = getContext(key);
+    const client = getClient();
 
     import * as HtmlUtils from '../html-utils.js';
     
@@ -10,6 +14,8 @@
     let messageText;
     let messageViewType;
     let senderName;
+
+    let imageSize = [0,0];
 
     function getMessageText() {
         let content;
@@ -59,6 +65,8 @@
     float: left;
     margin-top: 0.25em;
     margin-right: 0.5em;
+    object-fit: cover;
+    border-radius: 7px;
 }
 </style>
 
@@ -68,7 +76,7 @@
         {messageText}
     </div>
 {:else if messageViewType === "image"}
-    <div class="image"><MImage {event}></MImage></div>
+    <img class="image" alt={event.getContent().body} src={client.mxcUrlToHttp(event.getContent().url)} />
     <span class="sendername">{senderName}</span>
     <div class="message">Image</div>
 {/if}
