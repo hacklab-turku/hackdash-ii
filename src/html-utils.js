@@ -335,7 +335,7 @@ class HtmlHighlighter extends BaseHighlighter {
 }
 
 // Part of Replies fallback support
-function stripPlainReply(body) {
+export function stripPlainReply(body) {
     // Removes lines beginning with `> ` until you reach one that doesn't.
     const lines = body.split('\n');
     while (lines.length && lines[0].startsWith('> ')) lines.shift();

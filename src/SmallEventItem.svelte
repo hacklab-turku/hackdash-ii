@@ -105,6 +105,17 @@
     margin-right: 1em;
     font-size: 0.9em;
 }
+
+@media (min-width: 870px) {
+    .container {
+        padding-left: 4em;
+    }
+}
+@media (max-width: 869px) {
+    .container {
+        padding-left: 3em;
+    }
+}
 </style>
 
 <div class="container">

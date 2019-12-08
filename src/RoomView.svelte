@@ -12,7 +12,6 @@
     const client = getClient();
 
     export let roomId;
-    export let showBackButton;
     let room;
 
     let scrolledToBottom = true;
@@ -78,7 +77,7 @@
 }
 .backbutton {
     height: 100%;
-    width: 2em;
+    width: 2.5em;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -115,12 +114,24 @@
     min-height: 3em;
     border-top: 1px solid rgb(200, 200, 200);
 }
+
+@media (min-width: 870px) {
+    .backbutton {
+        display: none;
+    }
+}
+@media (max-width: 869px) {
+    .roomavatar {
+        margin-left: 0;
+        margin-right: 0.75em;
+    }
+}
 </style>
 
 <div class="container">
     {#if room}
         <div class="topbar">
-            {#if showBackButton}<a on:click={()=>dispatch('close')} class="backbutton"><span>&gt;</span></a>{/if}
+            <a on:click={()=>dispatch('close')} class="backbutton"><i class="fa fa-angle-left" aria-hidden="true"></i></a>
             <div class="roomavatar"><MatrixAvatar size="1" mxcUrl={room.getAvatarUrl(client.baseUrl)} name={room.name}></MatrixAvatar></div>
             <span class="roomname">{room.name}</span>
         </div>
@@ -128,7 +139,7 @@
             <div class="spacer"></div>
             {#each room.getLiveTimeline().getEvents() as event, i (event.getId())}
                 {#if eventDisplayType(event) == "DISPLAY"}
-                    <div class="event"><EventItem {event} showSender={shouldShowSender(i)}></EventItem></div>
+                    <div class="event"><EventItem {room} {event} showSender={shouldShowSender(i)}></EventItem></div>
                 {:else if eventDisplayType(event) == "SMALL"}
                     <div class="event"><SmallEventItem {event}}></SmallEventItem></div>
                 {/if}

@@ -13,10 +13,6 @@
 	let ready = false;
 	let matrixError = false;
 
-    let width;
-    let narrowView;
-    $: narrowView = width<768;
-
 	onMount(async () => {
         let indexedDB;
         try {
@@ -79,17 +75,17 @@ main {
 .app {
     height: 100%;
     width: 100%;
-    max-width: 1024px;
+    max-width: 1280px;
     margin-left: auto;
     margin-right: auto;
     box-shadow: 0px 0px 20px 6px rgba(0, 0, 0, 0.20);
 }
 </style>
 
-<main bind:clientWidth={width}>
+<main>
 {#if !ready}
 <div class="loading"><span>loading...</span></div>
 {:else}
-        <div class="app"><MatrixApp {matrixError} {narrowView}></MatrixApp></div>
+        <div class="app"><MatrixApp {matrixError}></MatrixApp></div>
 {/if}
 </main>

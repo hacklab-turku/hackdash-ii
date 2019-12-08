@@ -40,11 +40,25 @@
     }
 
     async function selectRoom(room) {
+        if (currentRoom === undefined) {
+            history.pushState({roomId: room.roomId}, "", `#${room.roomId}`);
+        } else {
+            history.replaceState({roomId: room.roomId}, "", `#${room.roomId}`);
+        }
         currentRoom = undefined;
         await tick();
         currentRoom = room.roomId;
         chatViewActive = true;
         updateRoomList();
+    }
+
+    function unselectRoom() {
+        currentRoom = undefined;
+        chatViewActive = false;
+    }
+
+    window.onpopstate = (event) => {
+        unselectRoom();
     }
 
     onMount(() => {
@@ -70,32 +84,40 @@ ul {
     flex-direction: row;
     height: 100%;
 }
-.sidebar.normalView {
-    width: 30%;
-    height: 100%;
-    overflow-y: scroll;
-}
-.mainarea.normalView {
-    width: 70%;
+
+@media (min-width: 870px) {
+    .sidebar {
+        width: 500px;
+        height: 100%;
+        overflow-y: scroll;
+        flex-shrink: 0;
+    }
+    .mainarea {
+        flex-shrink: 1;
+        flex-grow: 1;
+        min-width: 0;
+    }
 }
 
-.sidebar.narrowView {
-    width: 100%;
-    height: 100%;
-    overflow-y: scroll;
-}
-.mainarea.narrowView {
-    width: 100%;
-    height: 100%;
-}
+@media (max-width: 869px) {
+    .sidebar {
+        width: 100%;
+        height: 100%;
+        overflow-y: scroll;
+    }
+    .mainarea {
+        width: 100%;
+        height: 100%;
+    }
 
-.narrowView.hidden {
-    display: none;
+    .hidden {
+        display: none;
+    }
 }
 </style>
 
 <div class="container">
-    <div class="sidebar" class:hidden={chatViewActive} class:narrowView class:normalView={!narrowView}>
+    <div class="sidebar" class:hidden={chatViewActive}>
             <h2>Chats</h2>
         <ul>
         {#each favoriteRooms as room (room.roomId)}
@@ -109,11 +131,11 @@ ul {
         {/each}
         </ul>
     </div>
-    <div class="mainarea" class:hidden={!chatViewActive} class:narrowView class:normalView={!narrowView}>
+    <div class="mainarea" class:hidden={!chatViewActive}>
     {#if matrixError}
         ERROR!!!
     {:else if currentRoom != undefined}
-            <RoomView on:close={()=>chatViewActive=false} showBackButton={narrowView} roomId={currentRoom}></RoomView>
+            <RoomView on:close={()=>{unselectRoom(); history.back()}} roomId={currentRoom}></RoomView>
     {/if}
     </div>
 </div>

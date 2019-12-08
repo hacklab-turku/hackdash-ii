@@ -5,7 +5,7 @@
 	const { getClient } = getContext(key);
     const client = getClient();
 
-    export let mxcUrl = undefined;
+    export let imageUrl = undefined;
     export let name = undefined;
     export let size;
 
@@ -17,7 +17,7 @@
     }
 
     onMount(async () => {
-        await fetch(mxcUrl)
+        await fetch(imageUrl)
             .then(r => {
                 if (r.status === 200) { hasImage = true; }
                 else { hasImage = false; }
@@ -49,7 +49,7 @@
 </style>
 
 {#if hasImage}
-<div class="container image" style="background-image: url({mxcUrl});">
+<div class="container image" style="background-image: url({imageUrl});">
 </div>
 {:else}
 <div class="container noimage" style="font-size: {size}em;">

@@ -56,7 +56,7 @@
 </style>
 
 <div class="container" class:selected>
-    <div class="avatar"><MatrixAvatar size="1" mxcUrl={room.getAvatarUrl(client.baseUrl)} name={room.name}></MatrixAvatar></div>
+    <div class="avatar"><MatrixAvatar size="1" imageUrl={room.getAvatarUrl(client.baseUrl)} name={room.name}></MatrixAvatar></div>
     <span class="roomname">{room.name}</span>
     <span class="previewtext">{#if previewEvent !== undefined}{previewEvent.sender.name}: {getSimpleText(previewEvent)}{/if}</span>
 </div>

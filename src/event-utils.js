@@ -1,3 +1,4 @@
+import { stripPlainReply } from './html-utils.js';
 
 // Event types to be displayed in a normal large size
 const displayEventTypes = [
@@ -19,6 +20,19 @@ export function eventDisplayType(event) {
     }
 }
 
+export function getViewType(event) {
+    let content;
+    if (event.replacingEvent()) { content = event.replacingEvent().getContent()['m.new_content'] }
+    else { content = event.getContent(); }
+
+    if ('msgtype' in content && content.msgtype === 'm.image') {
+        return "image";
+    } else if (event.getType() === 'm.sticker') {
+        return "sticker";
+    }
+    return "text";
+}
+
 export function getPreviewEvent(room) {
     let e = room.getLiveTimeline().getEvents()
     for (var i=e.length-1; i >= 0; i--) {
@@ -31,7 +45,7 @@ export function getPreviewEvent(room) {
 
 export function getSimpleText(event) {
     if (event === undefined) { return ''; }
-    else if ('body' in event.getContent()) { return event.getContent().body; }
+    else if ('body' in event.getContent()) { return stripPlainReply(event.getContent().body); }
     else { return 'Unimplemented event'; /*TODO*/ }
 }
 
