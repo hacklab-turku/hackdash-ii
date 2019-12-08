@@ -5,7 +5,7 @@
 
     import { eventDisplayType } from './event-utils.js';
 
-	import { createEventDispatcher, tick, onMount, getContext, beforeUpdate, afterUpdate } from 'svelte';
+	import { createEventDispatcher, tick, onMount, onDestroy, getContext, beforeUpdate, afterUpdate } from 'svelte';
     import { key } from './matrix.js';
     
 	const { getClient } = getContext(key);
@@ -42,15 +42,21 @@
         return true;
     }
 
+    function onRoomTimeline(event, eventRoom, toStartOfTimeline, removed, data) {
+        if (eventRoom.roomId == roomId) {
+            room = room;
+        }
+    }
+
     onMount(async () => {
         await tick();
         room = client.getRoom(roomId);
-        client.on("Room.timeline", function(event, eventRoom, toStartOfTimeline, removed, data) {
-            if (eventRoom.roomId == roomId) {
-                room = room;
-            }
-        });
+        client.on("Room.timeline", onRoomTimeline);
     });
+
+    onDestroy(() => {
+        client.removeListener("Room.timeline", onRoomTimeline);
+    })
 
     beforeUpdate(() => {
         room = room;
@@ -81,7 +87,7 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    height: 4em;
+    height: 3em;
     border-bottom: 1px solid rgb(200, 200, 200);
 }
 .backbutton {
@@ -92,8 +98,8 @@
     justify-content: center;
 }
 .roomavatar {
-    width: 3em;
-    height: 3em;
+    width: 2em;
+    height: 2em;
     margin-top: 0.5em;
     margin-bottom: 0.5em;
     margin-left: 1em;

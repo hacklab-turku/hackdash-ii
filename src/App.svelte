@@ -1,40 +1,55 @@
 <script>
 	import MatrixApp from './MatrixApp.svelte';
+	import LoginPage from './LoginPage.svelte';
 
 	import { onMount, setContext } from 'svelte';
 	import { matrixcs, key } from './matrix.js';
-	import creds from './temp-creds.js';
 
 	setContext(key, {
 		getClient: () => matrixClient
 	});
 
 	let matrixClient;
+	let loggedIn = false;
 	let ready = false;
 	let matrixError = false;
 
 	onMount(async () => {
-        let indexedDB;
-        try {
-            indexedDB = window.indexedDB;
-        } catch (e) {}
+		await startClient();
+	});
 
-        let storeOpts = {};
-        if (indexedDB && localStorage) {
-            storeOpts.store = new matrixcs.IndexedDBStore({
-                indexedDB: indexedDB,
-                dbName: "svelte-matrix-sync",
-            });
-            await storeOpts.store.startup();
-        }
+	async function startClient() {
+		let localStorage = window.localStorage;
+		let matrixSession;
+
+		if (!localStorage.getItem('matrixLoginSession')) {
+			loggedIn = false;
+			return;
+		} else {
+			loggedIn = true;
+			matrixSession = JSON.parse(localStorage.getItem('matrixLoginSession'));
+		}
+		let indexedDB;
+		try {
+			indexedDB = window.indexedDB;
+		} catch (e) {}
+
+		let storeOpts = {};
+		if (indexedDB && localStorage) {
+			storeOpts.store = new matrixcs.IndexedDBStore({
+				indexedDB: indexedDB,
+				dbName: "svelte-matrix-sync",
+			});
+			await storeOpts.store.startup();
+		}
 
 		matrixClient = matrixcs.createClient(
 		{
-            ...storeOpts,
-			...creds,
+			...storeOpts,
+			...matrixSession,
 			unstableClientRelationAggregation: true,
-            useAuthorizationHeader: true,
-            timelineSupport: true,
+			useAuthorizationHeader: true,
+			timelineSupport: true,
 		});
 		matrixClient.on("sync", function(state, prevState, data) {
 			switch (state) {
@@ -54,7 +69,7 @@
 		});
 		window.mxcUrlToHttp = matrixClient.mxcUrlToHttp;
 		matrixClient.startClient();
-	});
+	}
 </script>
 
 <style>
@@ -78,14 +93,19 @@ main {
     max-width: 1280px;
     margin-left: auto;
     margin-right: auto;
+	box-sizing: border-box;
     box-shadow: 0px 0px 20px 6px rgba(0, 0, 0, 0.20);
 }
 </style>
 
 <main>
-{#if !ready}
-<div class="loading"><span>loading...</span></div>
+{#if !loggedIn}
+	<div class="app"><LoginPage on:loggedIn={startClient}></LoginPage></div>
 {:else}
-        <div class="app"><MatrixApp {matrixError}></MatrixApp></div>
+	{#if !ready}
+		<div class="loading"><span>loading...</span></div>
+	{:else}
+		<div class="app"><MatrixApp {matrixError}></MatrixApp></div>
+	{/if}
 {/if}
 </main>

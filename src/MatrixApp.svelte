@@ -84,13 +84,13 @@ ul {
     flex-direction: row;
     height: 100%;
 }
-
 @media (min-width: 870px) {
     .sidebar {
         width: 500px;
         height: 100%;
         overflow-y: scroll;
         flex-shrink: 0;
+        border-right: 1px solid rgb(200, 200, 200);
     }
     .mainarea {
         flex-shrink: 1;

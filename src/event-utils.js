@@ -1,4 +1,5 @@
 import { stripPlainReply } from './html-utils.js';
+import * as HtmlUtils from './html-utils.js';
 
 // Event types to be displayed in a normal large size
 const displayEventTypes = [
@@ -44,9 +45,25 @@ export function getPreviewEvent(room) {
 }
 
 export function getSimpleText(event) {
-    if (event === undefined) { return ''; }
-    else if ('body' in event.getContent()) { return stripPlainReply(event.getContent().body); }
-    else { return 'Unimplemented event'; /*TODO*/ }
+    let content;
+    if (event.replacingEvent()) { content = event.replacingEvent().getContent()['m.new_content'] }
+    else { content = event.getContent(); }
+    
+    const stripReply = getParentEventId(event);
+    if ('body' in content) {
+        let text = HtmlUtils.bodyToHtml(content, [], {
+            disableBigEmoji: content.msgtype === "m.emote",
+            stripReplyFallback: stripReply,
+        });
+        if (text.isDisplayedWithHtml) {
+            let el = document.createElement('div');
+            el.innerHTML = text.text;
+            return el.innerText;
+        } else {
+            return text.text;
+        }
+    }
+    else { return "Unsupported message"; }
 }
 
 export function getImageHeight(event, clientWidth) {

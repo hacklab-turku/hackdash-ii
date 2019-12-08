@@ -113,6 +113,7 @@
 }
 .timestamp {
     font-size: 0.6rem;
+    flex-shrink: 0;
     text-align: center;
 }
 @media (min-width: 870px) {
