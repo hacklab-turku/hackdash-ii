@@ -11,7 +11,6 @@
     const client = getClient();
     
     export let matrixError;
-    export let narrowView;
 
     let favoriteRooms = [];
     let otherRooms = [];

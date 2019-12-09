@@ -6,7 +6,7 @@
     import * as HtmlUtils from './html-utils.js';
 	import { getContext, beforeUpdate } from 'svelte';
     import { key } from './matrix.js';
-    import { getParentEventId, getViewType } from './event-utils.js';
+    import { getImageHeight, getParentEventId, getViewType } from './event-utils.js';
     
 
 	const { getClient } = getContext(key);
@@ -36,6 +36,11 @@
     }
 
     let width;
+
+    let imageWidth = width/2;
+    $: imageWidth = width/2;
+    let imageHeight = getImageHeight(event, imageWidth);
+    $: imageHeight = getImageHeight(event, imageWidth);
 
     let edited;
     let messageText;
@@ -87,9 +92,6 @@
     margin-bottom: 0.25em;
     max-width: 400px;
     margin-right: 2em;
-}
-.image {
-    max-width: 50%;
 }
 .timestamp {
     font-size: 0.6rem;
@@ -182,7 +184,7 @@
         {#if messageText.isDisplayedWithHtml}{@html messageText.text}{:else}{messageText.text}{/if}
         {#if edited}<span class="edited">(edited)</span>{/if}
     {:else if messageViewType === "image"}
-        <div class="image"><MImage on:reflow width={width/2} {event}></MImage></div>
+        <div style="width: {imageWidth}px; height: {imageHeight}px;"><MImage {event}></MImage></div>
     {/if}
 </div>
 <span class="timestamp">{timestamp}</span>

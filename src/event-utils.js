@@ -68,8 +68,12 @@ export function getSimpleText(event) {
 
 export function getImageHeight(event, clientWidth) {
     let i = event.getContent().info;
-    let aspectRatio = i.h/i.w;
-    return clientWidth*aspectRatio;
+    if (i) {
+        let aspectRatio = i.h/i.w;
+        return clientWidth*aspectRatio;
+    } else {
+        return undefined;
+    }
 }
 /*
 Copyright 2017 New Vector Ltd

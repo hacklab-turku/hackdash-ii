@@ -52,6 +52,7 @@
         await tick();
         room = client.getRoom(roomId);
         client.on("Room.timeline", onRoomTimeline);
+        checkScrolledToTop();
     });
 
     onDestroy(() => {
@@ -78,7 +79,32 @@
         if (eventlist) {
             if (scrolledToBottom) { eventlist.scrollTo(0, eventlist.scrollHeight); }
             else { eventlist.scrollTo(0, eventlist.scrollHeight-oldDistanceFromBottom); };
+            checkScrolledToTop();
         }
+    }
+
+    let timelineTopPlaceholder;
+    let scrollBackPromise;
+
+    function checkScrolledToTop() {
+        if (eventlist && timelineTopPlaceholder) {
+            const windowBounds = eventlist.getBoundingClientRect();
+            const placeholderBounds = timelineTopPlaceholder.getBoundingClientRect();
+
+            if (placeholderBounds.bottom >= windowBounds.top && scrollBackPromise === undefined) {
+                scrollBackPromise = scrollBack().done();
+            }
+        }
+    }
+
+    function scrollBack() {
+        return client.paginateEventTimeline(
+            room.getLiveTimeline(),
+            { backwards: true })
+            .then(()=>{
+                room = room;
+                scrollBackPromise = undefined;
+            });
     }
 </script>
 
@@ -153,8 +179,17 @@
             <div class="roomavatar"><MatrixAvatar size="1" imageUrl={room.getAvatarUrl(client.baseUrl)} name={room.name}></MatrixAvatar></div>
             <span class="roomname">{room.name}</span>
         </div>
-        <div bind:this={eventlist} class="eventlist">
+        <div bind:this={eventlist} on:scroll={checkScrolledToTop} class="eventlist">
             <div class="spacer"></div>
+            <div class="timelineTopPlaceholder" bind:this={timelineTopPlaceholder}>
+            {#await scrollBackPromise}
+            loading...
+            {:then ok}
+            load more messages
+            {:catch error}
+            {error.message}
+            {/await}
+            </div>
             {#each room.getLiveTimeline().getEvents() as event, i (event.getId())}
                 {#if eventDisplayType(event) == "DISPLAY"}
                     <div class="event"><EventItem on:reflow={reflow} {room} {event} showSender={shouldShowSender(i)}></EventItem></div>
