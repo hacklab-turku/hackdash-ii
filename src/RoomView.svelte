@@ -154,7 +154,8 @@
     flex-grow: 1;
 }
 .messagebar {
-    min-height: 3em;
+    line-height: 2.5em;
+    padding: 0 1em;
     border-top: 1px solid rgb(200, 200, 200);
 }
 .event {

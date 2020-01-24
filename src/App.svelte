@@ -54,7 +54,6 @@
 		matrixClient.on("sync", function(state, prevState, data) {
 			switch (state) {
 				case "ERROR":
-					console.log("ERROR!!!");
 					matrixError = true;
 					break;
 				case "SYNCING":
@@ -82,6 +81,8 @@
 
 		matrixClient = undefined;
 		loggedIn = false;
+		ready = false;
+		matrixError = false;
 	}
 </script>
 

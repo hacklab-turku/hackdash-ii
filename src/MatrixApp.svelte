@@ -114,8 +114,12 @@ ul {
     right: 0.5em;
     top: 2.6em;
     background: white;
-    padding: 0.5em;
     box-shadow: 0px 2px 15px 0px rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+}
+.menuitem {
+    padding: 0.5em 0.8em;
 }
 .hidden {
     display: none;
