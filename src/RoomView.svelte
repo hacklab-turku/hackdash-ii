@@ -19,6 +19,8 @@
     let initialLoad = true;
     let eventlist;
 
+    let width = 100;
+
     const dispatch = createEventDispatcher();
 
     function shouldShowSender(i) {
@@ -172,7 +174,7 @@
 }
 </style>
 
-<div class="container">
+<div class="container" bind:clientWidth={width}>
     {#if room}
         <div class="topbar">
             <a on:click={()=>dispatch('close')} class="backbutton"><i class="fa fa-angle-left" aria-hidden="true"></i></a>
@@ -192,13 +194,13 @@
             </div>
             {#each room.getLiveTimeline().getEvents() as event, i (event.getId())}
                 {#if eventDisplayType(event) == "DISPLAY"}
-                    <div class="event"><EventItem on:reflow={reflow} {room} {event} showSender={shouldShowSender(i)}></EventItem></div>
+                    <div class="event"><EventItem on:reflow={reflow} {width} {room} {event} showSender={shouldShowSender(i)}></EventItem></div>
                 {:else if eventDisplayType(event) == "SMALL"}
                     <div class="event"><SmallEventItem on:reflow={reflow} {event}}></SmallEventItem></div>
                 {/if}
             {/each}
         </div>
-        <div class="messagebar"></div>
+        <div class="messagebar">sorry, no sending messages yet</div>
     {:else}
         loading...
     {/if}

@@ -4,10 +4,11 @@
     import Reply from './event/Reply.svelte';
 
     import * as HtmlUtils from './html-utils.js';
-	import { getContext, beforeUpdate } from 'svelte';
+	import { createEventDispatcher, onMount, getContext, beforeUpdate } from 'svelte';
     import { key } from './matrix.js';
     import { getImageHeight, getParentEventId, getViewType } from './event-utils.js';
     
+    const dispatch = createEventDispatcher();
 
 	const { getClient } = getContext(key);
     const client = getClient();
@@ -15,6 +16,7 @@
     export let event;
     export let room;
     export let showSender;
+    export let width;
 
     function getMessageText() {
         let content;
@@ -35,30 +37,31 @@
         return new Date(event.getTs()).toLocaleTimeString([], {hour12: false, hour: '2-digit', minute: '2-digit'});
     }
 
-    let width;
-
     let imageWidth = width/2;
-    $: imageWidth = width/2;
     let imageHeight = getImageHeight(event, imageWidth);
-    $: imageHeight = getImageHeight(event, imageWidth);
 
     let edited;
     let messageText;
-    let messageViewType;
+    let messageViewType = getViewType(event);
 
     let replyEventId;
     let replyTo;
 
     let timestamp;
 
-    beforeUpdate(() => {
-            edited = !!event.replacingEvent();
-            messageText = getMessageText();
-            messageViewType = getViewType(event);
-            replyEventId = getParentEventId(event);
-            replyTo = room.findEventById(replyEventId);
-            timestamp = getTimestamp(event);
+    function update() {
+        edited = !!event.replacingEvent();
+        messageText = getMessageText();
+        messageViewType = getViewType(event);
+        replyEventId = getParentEventId(event);
+        replyTo = room.findEventById(replyEventId);
+        timestamp = getTimestamp(event);
+    }
+
+    onMount(() => {
+        update();
     });
+    beforeUpdate(update);
 </script>
 <style>
 .edited {
@@ -179,7 +182,7 @@
         {/if}
     </div>
 {/if}
-<div bind:clientWidth={width} class="message">
+<div class="message">
     {#if messageViewType === "text"}
         {#if messageText.isDisplayedWithHtml}{@html messageText.text}{:else}{messageText.text}{/if}
         {#if edited}<span class="edited">(edited)</span>{/if}

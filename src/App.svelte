@@ -70,6 +70,19 @@
 		window.mxcUrlToHttp = matrixClient.mxcUrlToHttp;
 		matrixClient.startClient();
 	}
+
+	function logout() {
+		matrixClient.stopClient();
+		window.localStorage.clear();
+
+		try {
+			let indexedDB = window.indexedDB;
+			indexedDB.deleteDatabase("matrix-js-sdk:svelte-matrix-sync");
+		} catch (e) {}
+
+		matrixClient = undefined;
+		loggedIn = false;
+	}
 </script>
 
 <style>
@@ -105,7 +118,7 @@ main {
 	{#if !ready}
 		<div class="loading"><span>loading...</span></div>
 	{:else}
-		<div class="app"><MatrixApp {matrixError}></MatrixApp></div>
+		<div class="app"><MatrixApp on:logout={logout} {matrixError}></MatrixApp></div>
 	{/if}
 {/if}
 </main>
