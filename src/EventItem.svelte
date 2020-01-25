@@ -73,6 +73,10 @@
     height: 0;
     overflow: visible;
 }
+.sendername {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+}
 .message {
     overflow-wrap: break-word;
     word-wrap: break-word;

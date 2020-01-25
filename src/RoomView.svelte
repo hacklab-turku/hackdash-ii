@@ -94,7 +94,7 @@
             const placeholderBounds = timelineTopPlaceholder.getBoundingClientRect();
 
             if (placeholderBounds.bottom >= windowBounds.top && scrollBackPromise === undefined) {
-                scrollBackPromise = scrollBack().done();
+                scrollBackPromise = scrollBack();
             }
         }
     }

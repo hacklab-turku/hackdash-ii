@@ -39,6 +39,7 @@
 			storeOpts.store = new matrixcs.IndexedDBStore({
 				indexedDB: indexedDB,
 				dbName: "svelte-matrix-sync",
+				workerScript: window.vector_indexeddb_worker_script
 			});
 			await storeOpts.store.startup();
 		}
@@ -67,7 +68,10 @@
 			}
 		});
 		window.mxcUrlToHttp = matrixClient.mxcUrlToHttp;
-		matrixClient.startClient();
+		await matrixClient.startClient({
+			initialSyncLimit: 20,
+			lazyLoadMembers: true,
+		});
 	}
 
 	function logout() {
