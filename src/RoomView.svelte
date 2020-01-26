@@ -23,25 +23,68 @@
 
     const dispatch = createEventDispatcher();
 
-    function shouldShowSender(i) {
-        if (i === 0) { return true; }
-        else if (i >= room.getLiveTimeline().getEvents().length) { return true; }
+    function getPreviousDisplayEventIndex(i) {
+        if (i<=0) { return i; }
+        else if (i >= room.getLiveTimeline().getEvents().length) { return i; }
 
         let previousDisplayEventIndex = i-1;
         while (previousDisplayEventIndex >= 0) {
             switch (eventDisplayType(room.getLiveTimeline().getEvents()[previousDisplayEventIndex])) {
                 case "DISPLAY":
-                    return room.getLiveTimeline().getEvents()[i].getSender() !=
-                           room.getLiveTimeline().getEvents()[previousDisplayEventIndex].getSender();
                 case "SMALL":
-                    return true;
+                    return previousDisplayEventIndex;
                 default:
+                    previousDisplayEventIndex--;
                     break;
             }
-            previousDisplayEventIndex--;
+        }
+        return previousDisplayEventIndex;
+    }
+
+    function shouldShowSender(i) {
+        if (i <= 0) { return true; }
+        else if (i >= room.getLiveTimeline().getEvents().length) { return true; }
+
+        let thisEvent = room.getLiveTimeline().getEvents()[i];
+        if (thisEvent == undefined) { return false; }
+        
+        let prevEvent = room.getLiveTimeline().getEvents()[getPreviousDisplayEventIndex(i)];
+        if (prevEvent == undefined) { return true; }
+
+        switch (eventDisplayType(prevEvent)) {
+            case "DISPLAY":
+                return (thisEvent.getSender() != prevEvent.getSender()) ||
+                        (thisEvent.getTs()-prevEvent.getTs() > 300000);
+            case "SMALL":
+                return true;
+            default:
+                break;
         }
 
         return true;
+    }
+
+    function shouldShowDateSeparator(i) {
+        if (i <= 0) { return true; }
+        else if (i >= room.getLiveTimeline().getEvents().length) { return false; }
+
+        let thisEvent = room.getLiveTimeline().getEvents()[i];
+        if (thisEvent == undefined || eventDisplayType(thisEvent) == "NONE") { return false; }
+
+        let prevEvent = room.getLiveTimeline().getEvents()[getPreviousDisplayEventIndex(i)];
+        if (prevEvent == undefined) {
+            return true;
+        }
+
+        let eventDate = new Date(thisEvent.getTs());
+        let previousEventDate = new Date(prevEvent.getTs());
+
+        return !(
+            eventDate.getFullYear() === previousEventDate.getFullYear() &&
+            eventDate.getMonth() === previousEventDate.getMonth() &&
+            eventDate.getDate() === previousEventDate.getDate()
+        );
+
     }
 
     function onRoomTimeline(event, eventRoom, toStartOfTimeline, removed, data) {
@@ -162,6 +205,14 @@
     position: relative;
 }
 
+.dateseparator {
+  margin: 0.3em;
+  text-align: center;
+  border-bottom: 1px solid rgb(200, 200, 200);
+  font-size: 0.9rem;
+  margin-bottom: 0.4em;
+}
+
 @media (min-width: 870px) {
     .backbutton {
         display: none;
@@ -194,6 +245,11 @@
             {/await}
             </div>
             {#each room.getLiveTimeline().getEvents() as event, i (event.getId())}
+                {#if shouldShowDateSeparator(i)}
+                    <div class="dateseparator">
+                        {new Date(event.getTs()).toDateString()}
+                    </div>
+                {/if}
                 {#if eventDisplayType(event) == "DISPLAY"}
                     <div class="event"><EventItem on:reflow={reflow} {width} {room} {event} showSender={shouldShowSender(i)}></EventItem></div>
                 {:else if eventDisplayType(event) == "SMALL"}
