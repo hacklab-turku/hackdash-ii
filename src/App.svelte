@@ -5,6 +5,8 @@
 	import { onMount, setContext } from 'svelte';
 	import { matrixcs, key } from './matrix.js';
 
+	const currentBreakingVersion = "1";
+
 	setContext(key, {
 		getClient: () => matrixClient
 	});
@@ -21,6 +23,15 @@
 	async function startClient() {
 		let localStorage = window.localStorage;
 		let matrixSession;
+
+		// sort of a simple and hacky way to
+		// logout and delete everything if the current data
+		// is from before a breaking change
+		if (!(localStorage.getItem('breakingVersion') == currentBreakingVersion)) {
+			console.log("Breaking changes, logging out!");
+			logout();
+			localStorage.setItem('breakingVersion', currentBreakingVersion);
+		}
 
 		if (!localStorage.getItem('matrixLoginSession')) {
 			loggedIn = false;
@@ -75,8 +86,12 @@
 	}
 
 	function logout() {
-		matrixClient.stopClient();
+		try {
+			matrixClient.stopClient();
+		} catch (e) {}
+
 		window.localStorage.clear();
+		window.localStorage.setItem('breakingVersion', currentBreakingVersion);
 
 		try {
 			let indexedDB = window.indexedDB;

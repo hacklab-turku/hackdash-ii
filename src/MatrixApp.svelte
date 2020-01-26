@@ -181,7 +181,7 @@ ul {
     </div>
     <div class="mainarea" class:sidebarHidden={!chatViewActive}>
     {#if matrixError}
-        ERROR!!!
+        error
     {:else if currentRoom != undefined}
             <RoomView on:close={()=>{unselectRoom(); history.back()}} roomId={currentRoom}></RoomView>
     {/if}
