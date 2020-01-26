@@ -11,20 +11,15 @@
 
     let hasImage = false;
 
+    let img;
+
     function calculateLetter() {
         // TODO
         return name.charAt(0);
     }
 
-    onMount(async () => {
-        await fetch(imageUrl)
-            .then(r => {
-                if (r.status === 200) { hasImage = true; }
-                else { hasImage = false; }
-            })
-            .catch(r => {
-                hasImage = false;
-            });
+    onMount(() => {
+        img.src = imageUrl;
     });
 </script>
 
@@ -35,8 +30,6 @@
     border-radius: 50%;
     background-position: center;
     background-size: cover;
-}
-.image {
     background-color: white;
 }
 .noimage {
@@ -46,13 +39,20 @@
     text-align: center;
     display: flex;
 }
+.avatarimage {
+        height: 100%;
+        width: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+}
+.hidden {
+    display: none;
+}
 </style>
 
-{#if hasImage}
-<div class="container image" style="background-image: url({imageUrl});">
-</div>
-{:else}
-<div class="container noimage" style="font-size: {size}em;">
+<div class="container" class:noimage={!hasImage} style="font-size: {size}em;">
+<img class="avatarimage" bind:this={img} class:hidden={!hasImage} on:load={() => {hasImage=true;}} />
+{#if !hasImage}
 {calculateLetter()}
-</div>
 {/if}
+</div>
