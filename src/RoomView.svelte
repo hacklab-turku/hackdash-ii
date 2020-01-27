@@ -276,6 +276,8 @@
                         <div class="event"><SmallEventItem on:reflow={reflow} {event}}></SmallEventItem></div>
                     {/if}
                 {/each}
+            {:else}
+            loading...
             {/if}
         </div>
         <div class="messagebar">sorry, no sending messages yet</div>
