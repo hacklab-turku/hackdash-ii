@@ -6,13 +6,15 @@
     import { eventDisplayType } from './event-utils.js';
 
 	import { createEventDispatcher, tick, onMount, onDestroy, getContext, beforeUpdate, afterUpdate } from 'svelte';
-    import { key } from './matrix.js';
+    import { matrixcs, key } from './matrix.js';
     
 	const { getClient } = getContext(key);
     const client = getClient();
 
     export let roomId;
     let room;
+
+    let timelineWindow;
 
     let scrolledToBottom = true;
     let oldDistanceFromBottom = 0;
@@ -23,38 +25,34 @@
 
     const dispatch = createEventDispatcher();
 
-    function getPreviousDisplayEventIndex(i) {
-        if (i<=0) { return i; }
-        else if (i >= room.getLiveTimeline().getEvents().length) { return i; }
-
+    function getPreviousDisplayEvent(event, events) {
+        let i = events.findIndex(e => e.getId() === event.getId());
         let previousDisplayEventIndex = i-1;
         while (previousDisplayEventIndex >= 0) {
-            switch (eventDisplayType(room.getLiveTimeline().getEvents()[previousDisplayEventIndex])) {
+            let event = events[previousDisplayEventIndex];
+            switch (eventDisplayType(event)) {
                 case "DISPLAY":
                 case "SMALL":
-                    return previousDisplayEventIndex;
+                    return event;
                 default:
                     previousDisplayEventIndex--;
                     break;
             }
         }
-        return previousDisplayEventIndex;
+        return null;
     }
 
-    function shouldShowSender(i) {
-        if (i <= 0) { return true; }
-        else if (i >= room.getLiveTimeline().getEvents().length) { return true; }
-
-        let thisEvent = room.getLiveTimeline().getEvents()[i];
-        if (thisEvent == undefined) { return false; }
+    function shouldShowSender(event) {
         
-        let prevEvent = room.getLiveTimeline().getEvents()[getPreviousDisplayEventIndex(i)];
-        if (prevEvent == undefined) { return true; }
+        let prevEvent = getPreviousDisplayEvent(event, timelineWindow.getEvents());
+        if (prevEvent === null) { return true; }
+
+        if (shouldShowDateSeparator(event)) { return true; }
 
         switch (eventDisplayType(prevEvent)) {
             case "DISPLAY":
-                return (thisEvent.getSender() != prevEvent.getSender()) ||
-                        (thisEvent.getTs()-prevEvent.getTs() > 300000);
+                return (event.getSender() != prevEvent.getSender()) ||
+                        (event.getTs()-prevEvent.getTs() > 300000);
             case "SMALL":
                 return true;
             default:
@@ -64,19 +62,14 @@
         return true;
     }
 
-    function shouldShowDateSeparator(i) {
-        if (i <= 0) { return true; }
-        else if (i >= room.getLiveTimeline().getEvents().length) { return false; }
+    function shouldShowDateSeparator(event) {
 
-        let thisEvent = room.getLiveTimeline().getEvents()[i];
-        if (thisEvent == undefined || eventDisplayType(thisEvent) == "NONE") { return false; }
+        if (event.getType() === 'm.room.create') { return true; }
 
-        let prevEvent = room.getLiveTimeline().getEvents()[getPreviousDisplayEventIndex(i)];
-        if (prevEvent == undefined) {
-            return true;
-        }
+        let prevEvent = getPreviousDisplayEvent(event, timelineWindow.getEvents());
+        if (prevEvent === null) { return false; }
 
-        let eventDate = new Date(thisEvent.getTs());
+        let eventDate = new Date(event.getTs());
         let previousEventDate = new Date(prevEvent.getTs());
 
         return !(
@@ -90,12 +83,24 @@
     function onRoomTimeline(event, eventRoom, toStartOfTimeline, removed, data) {
         if (eventRoom.roomId == roomId) {
             room = room;
+            
+            timelineWindow.paginate(
+                matrixcs.EventTimeline.FORWARDS,
+                1
+            ).then(()=>{
+                timelineWindow = timelineWindow;
+            })
         }
     }
 
     onMount(async () => {
         await tick();
         room = client.getRoom(roomId);
+        await room.loadMembersIfNeeded();
+        timelineWindow = new matrixcs.TimelineWindow(
+            client, room.getTimelineSets()[0]
+        );
+        await timelineWindow.load();
         client.on("Room.timeline", onRoomTimeline);
         checkScrolledToTop();
     });
@@ -104,8 +109,9 @@
         client.removeListener("Room.timeline", onRoomTimeline);
     })
 
-    beforeUpdate(() => {
+    beforeUpdate(async () => {
         room = room;
+
         if (!initialLoad) {
             if (eventlist) {
                 scrolledToBottom = eventlist.clientHeight + eventlist.scrollTop > eventlist.scrollHeight - 20;
@@ -131,6 +137,8 @@
     let timelineTopPlaceholder;
     let scrollBackPromise;
 
+    let beginningOfTime = false;
+
     function checkScrolledToTop() {
         if (eventlist && timelineTopPlaceholder) {
             const windowBounds = eventlist.getBoundingClientRect();
@@ -143,12 +151,25 @@
     }
 
     function scrollBack() {
-        return client.paginateEventTimeline(
-            room.getLiveTimeline(),
-            { backwards: true })
+        if (timelineWindow === undefined) {
+            return Promise.reject({message:"no timeline"});
+        }
+        if (!timelineWindow.canPaginate(matrixcs.EventTimeline.BACKWARDS)) {
+            return Promise.reject({message:"can't paginate"});
+        }
+        return timelineWindow.paginate(
+            matrixcs.EventTimeline.BACKWARDS,
+            10
+        )
             .then(()=>{
                 room = room;
                 scrollBackPromise = undefined;
+                if (timelineWindow.getEvents()[0].getType() === 'm.room.create') {
+                    beginningOfTime = true;
+                }
+            })
+            .catch(()=>{
+                console.log("pagination failed!");
             });
     }
 </script>
@@ -235,27 +256,27 @@
         </div>
         <div bind:this={eventlist} on:scroll={checkScrolledToTop} class="eventlist">
             <div class="spacer"></div>
-            <div class="timelineTopPlaceholder" bind:this={timelineTopPlaceholder}>
-            {#await scrollBackPromise}
-            loading...
-            {:then ok}
-            load more messages
-            {:catch error}
-            {error.message}
-            {/await}
-            </div>
-            {#each room.getLiveTimeline().getEvents() as event, i (event.getId())}
-                {#if shouldShowDateSeparator(i)}
-                    <div class="dateseparator">
-                        {new Date(event.getTs()).toDateString()}
-                    </div>
-                {/if}
-                {#if eventDisplayType(event) == "DISPLAY"}
-                    <div class="event"><EventItem on:reflow={reflow} {width} {room} {event} showSender={shouldShowSender(i)}></EventItem></div>
-                {:else if eventDisplayType(event) == "SMALL"}
-                    <div class="event"><SmallEventItem on:reflow={reflow} {event}}></SmallEventItem></div>
-                {/if}
-            {/each}
+            {#if timelineWindow}
+                <div class="timelineTopPlaceholder" bind:this={timelineTopPlaceholder}>
+                {#await scrollBackPromise}
+                loading...
+                {:then ok}
+                load more messages
+                {/await}
+                </div>
+                {#each timelineWindow.getEvents() as event (event.getId())}
+                    {#if eventDisplayType(event) != "NONE" && shouldShowDateSeparator(event)}
+                        <div class="dateseparator">
+                            {new Date(event.getTs()).toDateString()}
+                        </div>
+                    {/if}
+                    {#if eventDisplayType(event) == "DISPLAY"}
+                        <div class="event"><EventItem on:reflow={reflow} {width} {room} {event} showSender={shouldShowSender(event)}></EventItem></div>
+                    {:else if eventDisplayType(event) == "SMALL"}
+                        <div class="event"><SmallEventItem on:reflow={reflow} {event}}></SmallEventItem></div>
+                    {/if}
+                {/each}
+            {/if}
         </div>
         <div class="messagebar">sorry, no sending messages yet</div>
     {:else}

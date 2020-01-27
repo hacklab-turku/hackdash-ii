@@ -17,11 +17,12 @@
             }
             // user was invited
             else if (e.getContent().membership === 'invite') {
-                return `${e.target.name} was invited`;
+                return `${e.sender.name} invited ${e.target.name}`;
             }
             // user was banned
             else if (e.getContent().membership === 'ban') {
-                return `${e.target.name} was banned`;
+                if ('reason' in e.getContent()) { reason = ` (${e.getContent().reason})`; }
+                return `${e.sender.name} banned ${e.target.name}${reason}`;
             }
         }
         else {
@@ -29,8 +30,16 @@
             if (e.getPrevContent().membership !== e.getContent().membership) {
                 let prev = e.getPrevContent().membership;
                 let curr = e.getContent().membership;
+
+                let reason = '';
+                if ('reason' in e.getContent()) { reason = ` (${e.getContent().reason})`; }
+
+                // user was invited
+                if (prev !== 'invite' && curr === 'invite') {
+                    return `${e.sender.name} invited ${e.target.name}`;
+                }
                 // user accepted the invitation or user rejoined the room
-                if ((prev === 'invite' || prev === 'leave') && curr === 'join') {
+                else if ((prev === 'invite' || prev === 'leave') && curr === 'join') {
                     return `${e.target.name} joined`;
                 }
                 // user rejected the invitation
@@ -43,15 +52,15 @@
                 }
                 // user was kicked (leave event sent by someone else)
                 else if (prev === 'join' && curr === 'leave') {
-                    let reason = '';
-                    if ('reason' in e.getContent()) { reason = ` (${e.getContent().reason})`; }
-                    return `${e.target.name} was kicked by ${e.sender.name}${reason}`;
+                    return `${e.sender.name} kicked ${e.target.name}${reason}`;
                 }
                 // user was banned (ban event sent by someone else)
                 else if (prev === 'join' && curr === 'ban') {
-                    let reason = '';
-                    if ('reason' in e.getContent()) { reason = ` (${e.getContent().reason})`; }
-                    return `${e.target.name} was kicked by ${e.sender.name}${reason}`;
+                    return `${e.sender.name} banned ${e.target.name}${reason}`;
+                }
+                // user was unbanned
+                else if (prev === 'ban' && curr !== 'ban') {
+                    return `${e.sender.name} unbanned ${e.target.name}${reason}`;
                 }
             } else {
                 let displaynameChange = null;
@@ -83,6 +92,8 @@
         switch (event.getType()) {
             case "m.room.member":
                 return memberText(event);
+            case "m.room.create":
+                return `${event.sender.name} created the room`;
             default:
                 return "Unsupported event "+event.getType();
         }

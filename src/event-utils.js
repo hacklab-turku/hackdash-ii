@@ -8,7 +8,8 @@ const displayEventTypes = [
 ];
 // Event types to be displayed smaller (without using the combined sender info)
 const smallDisplayEventTypes = [
-    "m.room.member"
+    "m.room.member",
+    "m.room.create"
 ];
 
 export function eventDisplayType(event) {

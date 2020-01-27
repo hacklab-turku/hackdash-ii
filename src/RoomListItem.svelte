@@ -31,6 +31,9 @@
     cursor: pointer;
     user-select: none;
 }
+.container:hover {
+    background-color: rgb(240, 240, 240);
+}
 .avatar {
     width: 3em;
     height: 3em;
@@ -51,7 +54,7 @@
     grid-area: 2 / 2 / 3 / 3;
 }
 .selected {
-    background-color: lightblue;
+    background-color: lightblue !important;
 }
 </style>
 

@@ -18,6 +18,8 @@
     export let showSender;
     export let width;
 
+    let messageElement;
+
     function getMessageText() {
         let content;
         if (event.replacingEvent()) { content = event.replacingEvent().getContent()['m.new_content'] }
@@ -47,7 +49,7 @@
     let replyEventId;
     let replyTo;
 
-    let timestamp;
+    let timestamp = getTimestamp(event);
 
     function update() {
         edited = !!event.replacingEvent();
@@ -55,11 +57,14 @@
         messageViewType = getViewType(event);
         replyEventId = getParentEventId(event);
         replyTo = room.findEventById(replyEventId);
-        timestamp = getTimestamp(event);
+        ///timestamp;
+
     }
 
     onMount(() => {
         update();
+        timestamp = getTimestamp(event);
+        HtmlUtils.linkifyElement(messageElement);
     });
     beforeUpdate(update);
 </script>
@@ -186,7 +191,7 @@
         {/if}
     </div>
 {/if}
-<div class="message">
+<div class="message" bind:this={messageElement}>
     {#if messageViewType === "text"}
         {#if messageText.isDisplayedWithHtml}{@html messageText.text}{:else}{messageText.text}{/if}
         {#if edited}<span class="edited">(edited)</span>{/if}
