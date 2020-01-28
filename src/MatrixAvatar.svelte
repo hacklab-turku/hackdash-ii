@@ -33,7 +33,7 @@
     background-color: white;
 }
 .noimage {
-    background-color: lightblue;
+    background-color: var(--empty-avatar-color);
     justify-content: center;
     align-items: center;
     text-align: center;

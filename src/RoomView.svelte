@@ -84,12 +84,14 @@
         if (eventRoom.roomId == roomId) {
             room = room;
             
-            timelineWindow.paginate(
-                matrixcs.EventTimeline.FORWARDS,
-                1
-            ).then(()=>{
-                timelineWindow = timelineWindow;
-            })
+            //if (scrolledToBottom) {
+                timelineWindow.paginate(
+                    matrixcs.EventTimeline.FORWARDS,
+                    1
+                ).then(()=>{
+                    timelineWindow = timelineWindow;
+                })
+            //}
         }
     }
 
@@ -180,7 +182,7 @@
     flex-direction: row;
     align-items: center;
     height: 3em;
-    border-bottom: 1px solid rgb(200, 200, 200);
+    border-bottom: 1px solid var(--thin-border-color);
 }
 .backbutton {
     height: 100%;
@@ -220,7 +222,7 @@
 .messagebar {
     line-height: 2.5em;
     padding: 0 1em;
-    border-top: 1px solid rgb(200, 200, 200);
+    border-top: 1px solid var(--thin-border-color);
 }
 .event {
     position: relative;
@@ -229,7 +231,7 @@
 .dateseparator {
   margin: 0.3em;
   text-align: center;
-  border-bottom: 1px solid rgb(200, 200, 200);
+  border-bottom: 1px solid var(--thin-border-color);
   font-size: 0.9rem;
   margin-bottom: 0.4em;
 }

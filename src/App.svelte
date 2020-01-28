@@ -3,6 +3,7 @@
 	import LoginPage from './LoginPage.svelte';
 
 	import { onMount, setContext } from 'svelte';
+    import { settings } from './settings/settingsstore.js';
 	import { matrixcs, key } from './matrix.js';
 
 	const currentBreakingVersion = "1";
@@ -106,12 +107,6 @@
 </script>
 
 <style>
-main {
-	margin: 0;
-	padding: 0;
-	width: 100%;
-	height: 100%;
-}
 .loading {
 	width: 100%;
 	height: 100%;
@@ -128,10 +123,49 @@ main {
     margin-right: auto;
 	box-sizing: border-box;
     box-shadow: 0px 0px 20px 6px rgba(0, 0, 0, 0.20);
+	position: relative;
+}
+:global(.light-color-scheme) {
+	--main-bg-color: white;
+	--main-text-color: black;
+	--empty-avatar-color: lightblue;
+	--hover-bg-color: rgb(240, 240, 240);
+	--selected-item-color: lightblue;
+	--thin-border-color: rgb(200, 200, 200);
+	--box-shadow-color: rgba(0,0,0,0.5);
+	--link-color: rgb(0, 73, 151);
+	--dim-bg-color: rgba(0,0,0,0.5);
+	scrollbar-color: light;
+}
+:global(.dark-color-scheme) {
+	--main-bg-color: rgb(40, 40, 40);
+	--main-text-color: white;
+	--empty-avatar-color: rgb(83, 83, 83);
+	--hover-bg-color: rgb(50, 50, 50);
+	--selected-item-color: rgb(64, 64, 64);
+	--thin-border-color: rgb(83, 83, 83);
+	--box-shadow-color: rgba(0,0,0,0.5);
+	--link-color: rgb(200, 200, 200);
+	--dim-bg-color: rgba(0,0,0,0.5);
+	scrollbar-color: dark;
+}
+main {
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	height: 100%;
+	background-color: var(--main-bg-color);
+	color: var(--main-text-color);
+}
+:global(main a) {
+	color: var(--link-color);
+}
+:global(main .fa) {
+	color: var(--main-text-color);
 }
 </style>
 
-<main>
+<main class:light-color-scheme={!$settings['darkColorScheme']} class:dark-color-scheme={$settings['darkColorScheme']}>
 {#if !loggedIn}
 	<div class="app"><LoginPage on:loggedIn={startClient}></LoginPage></div>
 {:else}

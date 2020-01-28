@@ -6,6 +6,7 @@
 
     import RoomListItem from './RoomListItem.svelte';
     import RoomView from './RoomView.svelte';
+    import SettingsView from './settings/SettingsView.svelte';
     
     const dispatch = createEventDispatcher();
 
@@ -20,6 +21,7 @@
     let chatViewActive = false;
 
     let sidebarMenuOpened = false;
+    let settingsOpened = true;
 
     let currentRoom = undefined;
 
@@ -113,13 +115,33 @@ ul {
     position: absolute;
     right: 0.5em;
     top: 2.6em;
-    background: white;
-    box-shadow: 0px 2px 15px 0px rgba(0,0,0,0.5);
+    background: var(--main-bg-color);
+    box-shadow: 0px 2px 15px 0px var(--box-shadow-color);
     display: flex;
     flex-direction: column;
 }
+.settingscontainer {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    background-color: var(--dim-bg-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+.settingswindow {
+    max-width: 100%;
+    max-height: 100%;
+    width: 50em;
+    height: 50em;
+    background-color: var(--main-bg-color);
+    box-shadow: 0px 2px 15px 0px var(--box-shadow-color);
+    z-index: 101;
+}
 .menuitem {
     padding: 0.5em 0.8em;
+    color: var(--main-text-color);
 }
 .hidden {
     display: none;
@@ -130,7 +152,7 @@ ul {
         height: 100%;
         overflow-y: scroll;
         flex-shrink: 0;
-        border-right: 1px solid rgb(200, 200, 200);
+        border-right: 1px solid var(--thin-border-color);
     }
     .mainarea {
         flex-shrink: 1;
@@ -155,6 +177,13 @@ ul {
 }
 </style>
 
+{#if settingsOpened}
+<div class="settingscontainer" on:click={()=>{settingsOpened=false;}}>
+    <div class="settingswindow" on:click={(e)=>{e.stopPropagation()}}>
+        <SettingsView on:done={()=>{settingsOpened=false;}}></SettingsView>
+    </div>
+</div>
+{/if}
 <div class="container">
     <div class="sidebar" class:sidebarHidden={chatViewActive}>
         <div class="sidebarheader">
@@ -162,7 +191,7 @@ ul {
             <a class="menubutton" on:click={() => {sidebarMenuOpened = !sidebarMenuOpened;}}>
                 <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                 <div class="menu" class:hidden={!sidebarMenuOpened}>
-                    <a class="menuitem">Settings</a>
+                    <a on:click={()=>{settingsOpened=true;}} class="menuitem">Settings</a>
                     <a on:click={logout} class="menuitem">Sign out</a>
                 </div>
             </a>

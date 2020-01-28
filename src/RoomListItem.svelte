@@ -30,9 +30,10 @@
     grid-column-gap: 0.8em;
     cursor: pointer;
     user-select: none;
+    color: var(--main-text-color);
 }
 .container:hover {
-    background-color: rgb(240, 240, 240);
+    background-color: var(--hover-bg-color);
 }
 .avatar {
     width: 3em;
@@ -54,7 +55,7 @@
     grid-area: 2 / 2 / 3 / 3;
 }
 .selected {
-    background-color: lightblue !important;
+    background-color: var(--selected-item-color) !important;
 }
 </style>
 
