@@ -21,7 +21,7 @@
     let chatViewActive = false;
 
     let sidebarMenuOpened = false;
-    let settingsOpened = true;
+    let settingsOpened = false;
 
     let currentRoom = undefined;
 
