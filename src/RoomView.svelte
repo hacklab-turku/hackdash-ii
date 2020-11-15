@@ -116,8 +116,10 @@
 
         if (!initialLoad) {
             if (eventlist) {
-                scrolledToBottom = eventlist.clientHeight + eventlist.scrollTop > eventlist.scrollHeight - 20;
-                oldDistanceFromBottom = eventlist.scrollHeight-eventlist.scrollTop;
+                //scrolledToBottom = eventlist.clientHeight + eventlist.scrollTop > eventlist.scrollHeight - 20;
+                //oldDistanceFromBottom = eventlist.scrollHeight-eventlist.scrollTop;
+                scrolledToBottom = true;
+                oldDistanceFromBottom = 0;
             }
         } else {
             initialLoad = false;
@@ -130,26 +132,26 @@
     
     function reflow() {
         if (eventlist) {
-            if (scrolledToBottom) { eventlist.scrollTo(0, eventlist.scrollHeight); }
-            else { eventlist.scrollTo(0, eventlist.scrollHeight-oldDistanceFromBottom); };
-            checkScrolledToTop();
+            /*if (scrolledToBottom) {*/ eventlist.scrollTo(0, eventlist.scrollHeight); /*}*/
+            //else { eventlist.scrollTo(0, eventlist.scrollHeight-oldDistanceFromBottom); };
+            //checkScrolledToTop();
         }
     }
 
     let timelineTopPlaceholder;
-    let scrollBackPromise;
+    //let scrollBackPromise;
 
     let beginningOfTime = false;
 
     function checkScrolledToTop() {
-        if (eventlist && timelineTopPlaceholder) {
+        /*if (eventlist && timelineTopPlaceholder) {
             const windowBounds = eventlist.getBoundingClientRect();
             const placeholderBounds = timelineTopPlaceholder.getBoundingClientRect();
 
             if (placeholderBounds.bottom >= windowBounds.top && scrollBackPromise === undefined) {
                 scrollBackPromise = scrollBack();
             }
-        }
+        }*/
     }
 
     function scrollBack() {
@@ -177,31 +179,6 @@
 </script>
 
 <style>
-.topbar {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    height: 3em;
-    border-bottom: 1px solid var(--thin-border-color);
-}
-.backbutton {
-    height: 100%;
-    width: 2.5em;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.roomavatar {
-    width: 2em;
-    height: 2em;
-    margin-top: 0.5em;
-    margin-bottom: 0.5em;
-    margin-left: 1em;
-    margin-right: 1em;
-}
-.roomname {
-    font-weight: bold;
-}
 .container {
     display: flex;
     flex-direction: column;
@@ -215,14 +192,15 @@
     max-height: 100%;
     overflow-y: scroll;
     flex-grow: 1;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;  /* IE 10+ */
+}
+.eventlist::-webkit-scrollbar {
+    width: 0px;
+    background: transparent; /* Chrome/Safari/Webkit */
 }
 .spacer {
     flex-grow: 1;
-}
-.messagebar {
-    line-height: 2.5em;
-    padding: 0 1em;
-    border-top: 1px solid var(--thin-border-color);
 }
 .event {
     position: relative;
@@ -235,36 +213,14 @@
   font-size: 0.9rem;
   margin-bottom: 0.4em;
 }
-
-@media (min-width: 870px) {
-    .backbutton {
-        display: none;
-    }
-}
-@media (max-width: 869px) {
-    .roomavatar {
-        margin-left: 0;
-        margin-right: 0.75em;
-    }
-}
 </style>
 
 <div class="container" bind:clientWidth={width}>
     {#if room}
-        <div class="topbar">
-            <a on:click={()=>dispatch('close')} class="backbutton"><i class="fa fa-angle-left" aria-hidden="true"></i></a>
-            <div class="roomavatar"><MatrixAvatar size="1" imageUrl={room.getAvatarUrl(client.baseUrl)} name={room.name}></MatrixAvatar></div>
-            <span class="roomname">{room.name}</span>
-        </div>
         <div bind:this={eventlist} on:scroll={checkScrolledToTop} class="eventlist">
             <div class="spacer"></div>
             {#if timelineWindow}
                 <div class="timelineTopPlaceholder" bind:this={timelineTopPlaceholder}>
-                {#await scrollBackPromise}
-                loading...
-                {:then ok}
-                load more messages
-                {/await}
                 </div>
                 {#each timelineWindow.getEvents() as event (event.getId())}
                     {#if eventDisplayType(event) != "NONE" && shouldShowDateSeparator(event)}
@@ -282,7 +238,6 @@
             loading...
             {/if}
         </div>
-        <div class="messagebar">sorry, no sending messages yet</div>
     {:else}
         loading...
     {/if}

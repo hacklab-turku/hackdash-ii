@@ -2,6 +2,7 @@
     import MatrixAvatar from './MatrixAvatar.svelte';
     import MImage from './event/MImage.svelte';
     import Reply from './event/Reply.svelte';
+    import SenderNetworkIcon from './SenderNetworkIcon.svelte';
 
     import * as HtmlUtils from './html-utils.js';
 	import { createEventDispatcher, onMount, getContext, beforeUpdate } from 'svelte';
@@ -81,8 +82,15 @@
 .sendername {
     overflow-wrap: break-word;
     word-wrap: break-word;
+    display: flex;
 }
 .message {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+}
+
+:global(a) {
     overflow-wrap: break-word;
     word-wrap: break-word;
 }
@@ -113,56 +121,27 @@
     margin-bottom: 0.6rem;
 }
 
-
-@media (min-width: 870px) {
-    .avatar {
-        width: 2em;
-        height: 2em;
-        margin-left: 1em;
-        margin-right: 1em;
-    }
-    .sendername {
-        margin-left: 4em;
-        margin-top: 0.3em;
-        margin-bottom: 0.3em;
-        font-weight: bold;
-    }
-    .reply {
-        margin-left: 4em;
-    }
-    .message {
-        margin-left: 4em;
-        margin-bottom: 0.5em;
-        margin-right: 1em;
-    }
-    .timestamp {
-        width: 4rem;
-    }
+.avatar {
+    width: 1.75em;
+    height: 1.75em;
+    margin-left: 0.625em;
 }
-
-@media (max-width: 869px) {
-    .avatar {
-        width: 2em;
-        height: 2em;
-        margin-left: 0.5em;
-    }
-    .sendername {
-        margin-left: 3em;
-        margin-top: 0.3em;
-        margin-bottom: 0.3em;
-        font-weight: bold;
-    }
-    .reply {
-        margin-left: 3em;
-    }
-    .message {
-        margin-left: 3em;
-        margin-bottom: 0.5em;
-        margin-right: 0.5em;
-    }
-    .timestamp {
-        width: 3rem;
-    }
+.sendername {
+    margin-left: 3em;
+    margin-top: 0.5em;
+    margin-bottom: 0.3em;
+    font-weight: bold;
+}
+.reply {
+    margin-left: 3em;
+}
+.message {
+    margin-left: 3em;
+    margin-bottom: 0.5em;
+    margin-right: 1em;
+}
+.timestamp {
+    width: 3rem;
 }
 </style>
 {#if showSender}
@@ -172,14 +151,14 @@
                 <MatrixAvatar size="1" imageUrl={event.sender.getAvatarUrl(client.baseUrl)} name={event.sender.name}></MatrixAvatar>
             </div>
         </div>
-        <div class="sendername">{event.sender.name}</div>
+        <div class="sendername">{event.sender.name} <SenderNetworkIcon userId={event.getSender()}></SenderNetworkIcon></div>
     {:else}
         <div class="avatarwrapper">
             <div class="avatar">
                 <MatrixAvatar size="1" name={event.getSender().charAt(1)}></MatrixAvatar>
             </div>
         </div>
-        <span class="sendername">{event.getSender()}</span>
+        <span class="sendername">{event.getSender()} <SenderNetworkIcon userId={event.getSender()}></SenderNetworkIcon></span>
     {/if}
 {/if}
 {#if replyEventId !== undefined}

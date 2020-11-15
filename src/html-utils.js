@@ -221,7 +221,7 @@ const transformTags = { // custom to matrix
 
 const sanitizeHtmlParams = {
     allowedTags: [
-        'font', // custom to matrix for IRC-style font coloring
+        //'font', // custom to matrix for IRC-style font coloring
         'del', // for markdown
         'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'p', 'a', 'ul', 'ol', 'sup', 'sub',
         'nl', 'li', 'b', 'i', 'u', 'strong', 'em', 'strike', 'code', 'hr', 'br', 'div',

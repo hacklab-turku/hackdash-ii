@@ -1,12 +1,17 @@
 <script>
 	import { createEventDispatcher, tick, onMount, onDestroy, getContext } from 'svelte';
     import { key } from './matrix.js';
+    import { onInterval } from './utils.js';
 
     import { getPreviewEvent } from './event-utils.js';
 
     import RoomListItem from './RoomListItem.svelte';
     import RoomView from './RoomView.svelte';
     import SettingsView from './settings/SettingsView.svelte';
+    import BusTimes from './BusTimes.svelte';
+    import TemperatureInfo from './TemperatureInfo.svelte';
+    import LightsInfo from './LightsInfo.svelte';
+    import PrinterInfo from './PrinterInfo.svelte';
     
     const dispatch = createEventDispatcher();
 
@@ -23,196 +28,91 @@
     let sidebarMenuOpened = false;
     let settingsOpened = false;
 
-    let currentRoom = undefined;
-
-    function updateRoomList() {
-        let rooms = client.getVisibleRooms();
-        favoriteRooms = rooms
-            .filter(r => "m.favourite" in r.tags)
-            .sort((r1, r2) => (r1.tags["m.favourite"] || 0) - (r2.tags["m.favourite"] || 0));
-        otherRooms = rooms
-            .filter(r => !("m.favourite" in r.tags))
-            .sort((r1, r2) => {
-                let r1Ts, r2Ts;
-                let r1Event = getPreviewEvent(r1);
-                let r2Event = getPreviewEvent(r2);
-                if (r1Event !== undefined) { r1Ts = r1Event.getTs();}
-                else { r1Ts = 0; }
-                if (r2Event !== undefined) { r2Ts = r2Event.getTs() }
-                else { r2Ts = 0; }
-                return (r2Ts) - (r1Ts);
-            });
-    }
-
-    async function selectRoom(room) {
-        if (currentRoom === undefined) {
-            history.pushState({roomId: room.roomId}, "", `#${room.roomId}`);
-        } else {
-            history.replaceState({roomId: room.roomId}, "", `#${room.roomId}`);
-        }
-        currentRoom = undefined;
-        await tick();
-        currentRoom = room.roomId;
-        chatViewActive = true;
-        updateRoomList();
-    }
-
-    function unselectRoom() {
-        currentRoom = undefined;
-        chatViewActive = false;
-    }
+    export let currentRoom = undefined;
 
     function logout() {
         currentRoom = undefined;
-        client.removeListener("sync", updateRoomList);
         client.logout();
         dispatch("logout");
     }
 
-    window.onpopstate = (event) => {
-        unselectRoom();
-    }
-
-    onMount(() => {
-        client.on("sync", updateRoomList);
-
-        updateRoomList();
-    });
-
-    onDestroy(() => {
-        client.removeListener("sync", updateRoomList);
-    })
+    let now = new Date();
+    onInterval(() => {
+        now = new Date();
+    }, 1000);
 </script>
 
 <style>
-h2 {
-    margin-left: 0.8em;
-}
-ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-}
-.container {
+.header {
     display: flex;
     flex-direction: row;
-    height: 100%;
-}
-.sidebarheader {
-    display: flex;
     align-items: center;
+    margin: 0 0.9em;
 }
-.sidebarheader h2 {
-    margin-left: 0.8em;
+.title {
     flex-grow: 1;
 }
-.menubutton {
+.time {
+    flex-grow: 0;
+}
+h1 {
+    margin: 0;
+    font-weight: normal;
+}
+.container {
     padding: 1em;
-    margin-right: 0.5em;
-    position: relative;
-}
-.menu {
-    position: absolute;
-    right: 0.5em;
-    top: 2.6em;
-    background: var(--main-bg-color);
-    box-shadow: 0px 2px 15px 0px var(--box-shadow-color);
-    display: flex;
-    flex-direction: column;
-}
-.settingscontainer {
-    width: 100%;
+    display: grid;
+    grid-template-columns: 6fr 2fr;
+    grid-template-rows: 3em 1fr 1fr 1fr auto auto auto;
+    grid-column-gap: 1em;
+    grid-row-gap: 1em; 
     height: 100%;
-    position: absolute;
-    background-color: var(--dim-bg-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 100;
+    box-sizing: border-box;
 }
-.settingswindow {
-    max-width: 100%;
-    max-height: 100%;
-    width: 50em;
-    height: 50em;
-    background-color: var(--main-bg-color);
-    box-shadow: 0px 2px 15px 0px var(--box-shadow-color);
-    z-index: 101;
+.small-tile {
+    border: 1px solid var(--thin-border-color);
+    box-sizing: border-box;
+    border-radius: 0.5em;
+    padding: 1em;
+    overflow: hidden;
 }
-.menuitem {
-    padding: 0.5em 0.8em;
-    color: var(--main-text-color);
+.chatview {
+    grid-area: 2 / 1 / 8 / 2;
 }
-.hidden {
-    display: none;
+.header {
+    grid-area: 1 / 1 / 2 / 3;
 }
-@media (min-width: 870px) {
-    .sidebar {
-        width: 30%;
-        height: 100%;
-        overflow-y: scroll;
-        flex-shrink: 0;
-        border-right: 1px solid var(--thin-border-color);
-    }
-    .mainarea {
-        flex-shrink: 1;
-        flex-grow: 1;
-        min-width: 0;
-    }
+.temperature {
+    grid-area: 2 / 2 / 3 / 3;
 }
-@media (max-width: 869px) {
-    .sidebar {
-        width: 100%;
-        height: 100%;
-        overflow-y: scroll;
-    }
-    .mainarea {
-        width: 100%;
-        height: 100%;
-    }
-    .sidebarHidden {
-        display: none;
-    }
-
+.lights {
+    grid-area: 3 / 2 / 4 / 3;
+}
+.printer {
+    grid-area: 4 / 2 / 5 / 3;
+}
+.bus1 {
+    grid-area: 5 / 2 / 6 / 3;
+}
+.bus2 {
+    grid-area: 6 / 2 / 7 / 3;
+}
+.bus3 {
+    grid-area: 7 / 2 / 8 / 3;
 }
 </style>
 
-{#if settingsOpened}
-<div class="settingscontainer" on:click={()=>{settingsOpened=false;}}>
-    <div class="settingswindow" on:click={(e)=>{e.stopPropagation()}}>
-        <SettingsView on:done={()=>{settingsOpened=false;}}></SettingsView>
-    </div>
-</div>
-{/if}
 <div class="container">
-    <div class="sidebar" class:sidebarHidden={chatViewActive}>
-        <div class="sidebarheader">
-            <h2>Chats</h2>
-            <a class="menubutton" on:click={() => {sidebarMenuOpened = !sidebarMenuOpened;}}>
-                <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
-                <div class="menu" class:hidden={!sidebarMenuOpened}>
-                    <a on:click={()=>{settingsOpened=true;}} class="menuitem">Settings</a>
-                    <a on:click={logout} class="menuitem">Sign out</a>
-                </div>
-            </a>
-        </div>
-        <ul>
-        {#each favoriteRooms as room (room.roomId)}
-        <li><a on:click={async () => await selectRoom(room)}><RoomListItem {room} selected={currentRoom===room.roomId}></RoomListItem></a></li>
-        {/each}
-        </ul>
-        <div style="height:2em;"></div>
-        <ul>
-        {#each otherRooms as room (room.roomId)}
-        <li><a on:click={async () => await selectRoom(room)}><RoomListItem {room} selected={currentRoom===room.roomId}></RoomListItem></a></li>
-        {/each}
-        </ul>
+    <div class="header">
+        <h1 class="title">Turku Hacklab</h1><h1 class="time">{(now.getHours()+'').padStart(2,'0')}:{(now.getMinutes()+'').padStart(2,'0')}</h1>
     </div>
-    <div class="mainarea" class:sidebarHidden={!chatViewActive}>
-    {#if matrixError}
-        error
-    {:else if currentRoom != undefined}
-            <RoomView on:close={()=>{unselectRoom(); history.back()}} roomId={currentRoom}></RoomView>
-    {/if}
+    <div class="chatview">
+        <RoomView roomId={currentRoom}></RoomView>
     </div>
+    <div class="small-tile temperature"><TemperatureInfo></TemperatureInfo></div>
+    <div class="small-tile lights"><LightsInfo></LightsInfo></div>
+    <div class="small-tile printer"><PrinterInfo></PrinterInfo></div>
+    <div class="small-tile bus1"><BusTimes stopIds={[1528,779]} titles={["1528, 779 Hepokankare"]} lines={4}></BusTimes></div>
+    <div class="small-tile bus2"><BusTimes stopIds={[967,972]} titles={["967, 972 Pläkkikaupunginkatu"]} lines={4}></BusTimes></div>
+    <div class="small-tile bus3"><BusTimes stopIds={[760]} titles={["760 Härkämäki"]} lines={4}></BusTimes></div>
 </div>

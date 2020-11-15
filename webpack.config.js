@@ -10,7 +10,6 @@ const jsSdkSrcDir = path.resolve(require.resolve("matrix-js-sdk/package.json"), 
 module.exports = {
 	entry: {
 		bundle: ['./src/main.js'],
-		"indexeddb-worker": "./src/vector/indexeddb-worker.js",
 	},
 	resolve: {
 		alias: {
@@ -72,6 +71,7 @@ module.exports = {
 	],
 	devtool: prod ? false: 'source-map',
 	devServer: {
-		host: '0.0.0.0'
+		host: '0.0.0.0',
+		disableHostCheck: true
 	}
 };

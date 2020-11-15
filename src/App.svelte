@@ -8,6 +8,8 @@
 
 	const currentBreakingVersion = "1";
 
+	const roomToView = "!cVPxWApjrmEqySjnxd:hacklab.fi";
+
 	setContext(key, {
 		getClient: () => matrixClient
 	});
@@ -41,24 +43,9 @@
 			loggedIn = true;
 			matrixSession = JSON.parse(localStorage.getItem('matrixLoginSession'));
 		}
-		let indexedDB;
-		try {
-			indexedDB = window.indexedDB;
-		} catch (e) {}
-
-		let storeOpts = {};
-		if (indexedDB && localStorage) {
-			storeOpts.store = new matrixcs.IndexedDBStore({
-				indexedDB: indexedDB,
-				dbName: "svelte-matrix-sync",
-				workerScript: window.vector_indexeddb_worker_script
-			});
-			await storeOpts.store.startup();
-		}
 
 		matrixClient = matrixcs.createClient(
 		{
-			...storeOpts,
 			...matrixSession,
 			unstableClientRelationAggregation: true,
 			useAuthorizationHeader: true,
@@ -81,8 +68,23 @@
 		});
 		window.mxcUrlToHttp = matrixClient.mxcUrlToHttp;
 		await matrixClient.startClient({
-			initialSyncLimit: 20,
-			lazyLoadMembers: true,
+			filter: matrixcs.Filter.fromJson(
+				matrixSession.userId,
+				undefined,
+				{
+					presence: {
+						not_types: ["*"]
+					},
+					room: {
+						ephemeral: {
+							not_types: ["*"]
+						},
+						rooms: [roomToView]
+					}
+				}
+			)
+			//initialSyncLimit: 20,
+			//lazyLoadMembers: true,
 		});
 	}
 
@@ -118,11 +120,9 @@
 .app {
     height: 100%;
     width: 100%;
-    max-width: 1280px;
     margin-left: auto;
     margin-right: auto;
 	box-sizing: border-box;
-    box-shadow: 0px 0px 20px 6px rgba(0, 0, 0, 0.20);
 	position: relative;
 }
 :global(.light-color-scheme) {
@@ -165,14 +165,14 @@ main {
 }
 </style>
 
-<main class:light-color-scheme={!$settings['darkColorScheme']} class:dark-color-scheme={$settings['darkColorScheme']}>
+<main class="dark-color-scheme">
 {#if !loggedIn}
 	<div class="app"><LoginPage on:loggedIn={startClient}></LoginPage></div>
 {:else}
 	{#if !ready}
 		<div class="loading"><span>loading...</span></div>
 	{:else}
-		<div class="app"><MatrixApp on:logout={logout} {matrixError}></MatrixApp></div>
+		<div class="app"><MatrixApp on:logout={logout} {matrixError} currentRoom={roomToView}></MatrixApp></div>
 	{/if}
 {/if}
 </main>
