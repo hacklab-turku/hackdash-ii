@@ -29,9 +29,9 @@ p {
         })
     }
 
-    onInterval(refreshTemperature(), 30000);
+    onInterval(refreshTemperature, 30000);
     refreshTemperature();
-    onInterval(refreshHumidity(), 30000);
+    onInterval(refreshHumidity, 30000);
     refreshHumidity();
 </script>
 
