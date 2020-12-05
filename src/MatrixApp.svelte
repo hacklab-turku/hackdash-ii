@@ -85,6 +85,10 @@ h1 {
 .header {
     grid-area: 1 / 1 / 2 / 3;
 }
+.logo {
+    max-width: 100%;
+    max-height: 100%;
+}
 .temperature {
     grid-area: 2 / 2 / 3 / 3;
 }
@@ -107,6 +111,9 @@ h1 {
 
 <div class="container">
     <div class="header">
+        {#if localsettings.logo}
+            <img src={localsettings.logo} alt="Logo" class="logo">
+        {/if}
         <h1 class="title">{localsettings.title}</h1><h1 class="time">{(now.getHours()+'').padStart(2,'0')}:{(now.getMinutes()+'').padStart(2,'0')}</h1>
     </div>
     <div class="chatview">
