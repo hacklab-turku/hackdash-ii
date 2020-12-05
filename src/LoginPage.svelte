@@ -1,6 +1,7 @@
 <script>
     import { createEventDispatcher, getContext } from 'svelte';
     import { key } from './matrix.js';
+    import { localsettings } from './LocalSettings';
 
 	const { getClient } = getContext(key);
     const client = getClient();
@@ -22,7 +23,7 @@
     }
     $: strippedHsURL = stripHsURL(hsURL);
 
-    let servername = "";
+    let servername = localsettings.matrixServer;
     let strippedServername;
     function stripServername(input) {
         // strip protocol and trailing slash if someone inputs those
@@ -73,7 +74,7 @@
         } else { throw new Error("Not a Matrix server"); }
     }
 
-    let localpart = "";
+    let localpart = localsettings.matrixUser;
     let strippedLocalpart;
     function stripLocalpart(input) {
         // if you put a MXID in the localpart field, extract the localpart from it

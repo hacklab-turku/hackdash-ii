@@ -4,7 +4,7 @@
     import { onInterval } from './utils.js';
 
     import { getPreviewEvent } from './event-utils.js';
-
+	import { localsettings } from './LocalSettings.js';
     import RoomListItem from './RoomListItem.svelte';
     import RoomView from './RoomView.svelte';
     import SettingsView from './settings/SettingsView.svelte';
@@ -18,7 +18,7 @@
 	const { getClient } = getContext(key);
     const client = getClient();
     
-    export let matrixError;
+    // export let matrixError;
 
     let favoriteRooms = [];
     let otherRooms = [];
@@ -27,6 +27,9 @@
 
     let sidebarMenuOpened = false;
     let settingsOpened = false;
+    let chatWidth = (localsettings.showTemperature || localsettings.showLights || localsettings.showPrinter || localsettings.showBuses) ? 2 : 3;
+
+    $: document.documentElement.style.setProperty('--chatWidth', chatWidth)
 
     export let currentRoom = undefined;
 
@@ -77,7 +80,7 @@ h1 {
     overflow: hidden;
 }
 .chatview {
-    grid-area: 2 / 1 / 8 / 2;
+    grid-area: 2 / 1 / 8 / var(--chatWidth) ;
 }
 .header {
     grid-area: 1 / 1 / 2 / 3;
@@ -104,15 +107,23 @@ h1 {
 
 <div class="container">
     <div class="header">
-        <h1 class="title">Turku Hacklab</h1><h1 class="time">{(now.getHours()+'').padStart(2,'0')}:{(now.getMinutes()+'').padStart(2,'0')}</h1>
+        <h1 class="title">{localsettings.title}</h1><h1 class="time">{(now.getHours()+'').padStart(2,'0')}:{(now.getMinutes()+'').padStart(2,'0')}</h1>
     </div>
     <div class="chatview">
         <RoomView roomId={currentRoom}></RoomView>
     </div>
-    <div class="small-tile temperature"><TemperatureInfo></TemperatureInfo></div>
-    <div class="small-tile lights"><LightsInfo></LightsInfo></div>
-    <div class="small-tile printer"><PrinterInfo></PrinterInfo></div>
-    <div class="small-tile bus1"><BusTimes stopIds={[1528,779]} titles={["1528, 779 Hepokankare"]} lines={4}></BusTimes></div>
-    <div class="small-tile bus2"><BusTimes stopIds={[967,972]} titles={["967, 972 Pläkkikaupunginkatu"]} lines={4}></BusTimes></div>
-    <div class="small-tile bus3"><BusTimes stopIds={[760]} titles={["760 Härkämäki"]} lines={4}></BusTimes></div>
+    {#if localsettings.showTemperature }
+        <div class="small-tile temperature"><TemperatureInfo></TemperatureInfo></div>
+    {/if}
+    {#if localsettings.showLights }
+        <div class="small-tile lights"><LightsInfo></LightsInfo></div>
+    {/if}
+    {#if localsettings.showPrinter }
+        <div class="small-tile printer"><PrinterInfo></PrinterInfo></div>
+    {/if}
+    {#if localsettings.showBuses }
+        <div class="small-tile bus1"><BusTimes stopIds={[1528,779]} titles={["1528, 779 Hepokankare"]} lines={4}></BusTimes></div>
+        <div class="small-tile bus2"><BusTimes stopIds={[967,972]} titles={["967, 972 Pläkkikaupunginkatu"]} lines={4}></BusTimes></div>
+        <div class="small-tile bus3"><BusTimes stopIds={[760]} titles={["760 Härkämäki"]} lines={4}></BusTimes></div>
+    {/if}
 </div>

@@ -29,5 +29,5 @@ img {
 </style>
 
 <div class="container">
-    <img src={getNetworkIcon(userId)}>
+    <img src={getNetworkIcon(userId)} alt="SenderNet">
 </div>

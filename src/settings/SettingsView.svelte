@@ -28,7 +28,7 @@
 <div class="container">
     <div class="header">
         <h2>Settings</h2>
-        <a class="closebutton" on:click={()=>{dispatch("done")}}><i class="fa fa-times" aria-hidden="true"></i></a>
+        <a class="closebutton" href="/" on:click={()=>{dispatch("done")}}><i class="fa fa-times" aria-hidden="true"></i></a>
     </div>
     <div class="maincontent">
     <Checkbox name={"darkColorScheme"} label={"Dark color scheme"} defaultValue={false}></Checkbox>

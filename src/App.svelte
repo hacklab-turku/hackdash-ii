@@ -5,10 +5,9 @@
 	import { onMount, setContext } from 'svelte';
     import { settings } from './settings/settingsstore.js';
 	import { matrixcs, key } from './matrix.js';
+	import { localsettings } from './LocalSettings.js';
 
 	const currentBreakingVersion = "1";
-
-	const roomToView = "!cVPxWApjrmEqySjnxd:hacklab.fi";
 
 	setContext(key, {
 		getClient: () => matrixClient
@@ -79,7 +78,7 @@
 						ephemeral: {
 							not_types: ["*"]
 						},
-						rooms: [roomToView]
+						rooms: [localsettings.roomToView]
 					}
 				}
 			)
@@ -172,7 +171,7 @@ main {
 	{#if !ready}
 		<div class="loading"><span>loading...</span></div>
 	{:else}
-		<div class="app"><MatrixApp on:logout={logout} {matrixError} currentRoom={roomToView}></MatrixApp></div>
+		<div class="app"><MatrixApp on:logout={logout} {matrixError} currentRoom={localsettings.roomToView}></MatrixApp></div>
 	{/if}
 {/if}
 </main>
