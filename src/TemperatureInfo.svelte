@@ -17,15 +17,26 @@ p {
     let firstHumidity;
 
     async function refreshTemperature() {
-            return fetch(config.apiLocation+'temp/?a=getTemp').then(async response => {
-                firstTemperature = (await response.json()).data;
-                console.log("Temperature value: " +firstTemperature);
+            return fetch(config.apiLocation+'temp/?a=getTemp').then(async temperatureResponse => {
+                let data = await temperatureResponse.json();
+                if(data.status === "OK") {
+                    firstTemperature = (await data).data;
+                    console.log("Temperature value: " +firstTemperature);
+                }else {
+                    firstTemperature = 0;
+                    console.log("RefreshTemperature: " + data.status)
+                }
             })
     }
     async function refreshHumidity() {
-        return fetch(config.apiLocation+'humidity/?a=getHumidity').then(async response => {
-            firstHumidity = (await response.json()).data;
-            console.log("Humidity value: " +firstHumidity);
+        return fetch(config.apiLocation+'humidity/?a=getHumidity').then(async humidityResponse => {
+            let humidityData = await humidityResponse.json();
+            if(humidityData.status === "OK") {
+                firstHumidity = (await humidityData).data;
+                console.log("Humidity value: " +firstHumidity);
+            } else {
+                firstHumidity = 0;
+            }
         })
     }
 
