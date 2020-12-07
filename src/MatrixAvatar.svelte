@@ -51,7 +51,7 @@
 </style>
 
 <div class="container" class:noimage={!hasImage} style="font-size: {size}em;">
-<img class="avatarimage" bind:this={img} class:hidden={!hasImage} on:load={() => {hasImage=true;}} />
+<img class="avatarimage" alt="Avatar" bind:this={img} class:hidden={!hasImage} on:load={() => {hasImage=true;}} />
 {#if !hasImage}
 {calculateLetter()}
 {/if}
