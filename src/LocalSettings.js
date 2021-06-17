@@ -2,16 +2,16 @@ import { NoEmitOnErrorsPlugin } from "webpack";
 
 function createLocalSettings() {
     return {
-        "roomToView": "!matrix_room_id:matrix.server",
-        "title": "Title for the page",
+        "roomToView": "!DLojZSthiplZsDhCKu:hacklab.fi",
+        "title": "Hackdash",
         // "logo": "https://url.to/image.jpg",    // Optional
         "matrixUser": "@user:matrix.server", // Not used yet
         "matrixAccessToken": "MDAxOGlotofcharacters_fqy4yRQo", // Not used yet
         "matrixServer": "https://matrix.server", // Not used yet
-        "showTemperature": false,
-        "showLights": false,
-        "showPrinter": false,
-        "showBuses": false
+        "showTemperature": true,
+        "showLights": true,
+        "showPrinter": true,
+        "showBuses": true
     }
 }
 
